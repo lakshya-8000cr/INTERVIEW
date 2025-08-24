@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Interview Optimizer</title>
+    <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-wrapper">
+            <div class="auth-card">
+                <div class="logo">
+                    <div class="logo-icon"></div>
+                    <h1>Interview Optimizer</h1>
+                </div>
+                
+                <div class="auth-header">
+                    <h2>Create Your Account</h2>
+                    <p>Start your journey to interview success</p>
+                </div>
+                
+                <form id="signupForm" class="auth-form">
+                    <div id="errorMessage" class="error-message"></div>
+                    <div id="successMessage" class="success-message"></div>
+                    
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="fullName" 
+                            name="fullName" 
+                            required 
+                            placeholder="Enter your full name"
+                        >
+                        <div class="input-icon"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required 
+                            placeholder="Enter your email"
+                        >
+                        <div class="input-icon"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="Create a password"
+                            minlength="6"
+                        >
+                        <div class="input-icon"></div>
+                        <div class="password-strength">
+                            <div class="strength-bar"></div>
+                            <div class="strength-text">Password strength</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword" 
+                            required 
+                            placeholder="Confirm your password"
+                        >
+                        <div class="input-icon"></div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="agreeTerms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn primary" id="signupBtn">
+                        <span class="btn-text">Create Account</span>
+                        <div class="btn-loader"></div>
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="/">Sign in here</a></p>
+                </div>
+            </div>
+            
+            <div class="auth-background">
+                <div class="bg-pattern"></div>
+                <div class="feature-highlight">
+                    <h3> Why Interview Optimizer?</h3>
+                    <p>Transform your interview skills with cutting-edge AI technology</p>
+                    <ul>
+                        <li>✓ Personalized mock interviews</li>
+                        <li>✓ Real-time emotional analysis</li>
+                        <li>✓ Advanced prosody feedback</li>
+                        <li>✓ Career-specific coaching</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="scripts/auth.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', handleSignup);
+        
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+        });
+        
+        // Password confirmation checker
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.setCustomValidity('Passwords do not match');
+                this.style.borderColor = '#ef4444';
+            } else {
+                this.setCustomValidity('');
+                this.style.borderColor = '#d1d5db';
+            }
+        });
+    </script>
+</body>
+</html>
