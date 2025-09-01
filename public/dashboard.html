@@ -8,6 +8,9 @@
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        
         <!-- Sidebar -->
         <nav class="sidebar">
             <div class="sidebar-header">
@@ -50,13 +53,16 @@
             <!-- Header -->
             <header class="dashboard-header">
                 <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <span class="toggle-icon">☰</span>
+                    </button>
                     <h1>Welcome back, <span id="userName">Loading...</span>! </h1>
                     <p>Ready to ace your next interview?</p>
                 </div>
                 <div class="header-right">
                     <div class="header-actions">
-                        <button class="btn secondary">
-                            <span></span>
+                        <button onclick="window.location.href='./notification.html'" target="_blank" class="btn secondary">
+                            <!-- <span></span> -->
                             <span>Notifications</span>
                         </button>
                         <div class="user-menu">
