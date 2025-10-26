@@ -1232,3 +1232,28 @@ body::before {
         gap: 12px;
     }
 }
+
+/* --- Quick visibility override (applied to end of file) ---
+   Ensures main content area and cards remain readable in case theme variables or animations hide content.
+   This is a conservative, reversible fix. */
+.main-content, .dashboard-content, .content-section {
+    background: linear-gradient(180deg, rgba(8,12,18,0.98), rgba(12,16,22,0.98));
+    color: #e6eef8 !important;
+}
+.content-section * { color: inherit !important; }
+.content-section h2, .content-section h3, .content-section p, .content-section span {
+    color: #e6eef8 !important;
+}
+.stat-card, .action-card, .practice-card, .activity-item, .mi-card, .chart-container {
+    background: rgba(18,24,32,0.9) !important;
+    border: 1px solid rgba(255,255,255,0.03) !important;
+    color: #e6eef8 !important;
+}
+.btn, button, .action-card .btn, .practice-card .btn {
+    color: #061223 !important;
+    background: linear-gradient(90deg, #cfeffd, #d8b7ff) !important;
+    border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Make sure large empty areas are visible */
+.main-content { min-height: 400px; }

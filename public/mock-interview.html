@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview - Interview Optimizer</title>
+    <link rel="stylesheet" href="styles/mock-interview.light.css">
+</head>
+<body>
+    <div class="mi-container">
+        <!-- Permission banner shown when microphone access is blocked -->
+        <div id="permissionBanner" class="permission-banner" aria-live="assertive" hidden>
+            <div class="permission-inner">
+                <strong>Microphone access blocked</strong>
+                <p class="perm-msg">This app needs microphone access to record your answers.</p>
+                <div class="perm-actions">
+                    <button id="retryMicBtn" class="btn primary">Retry Microphone</button>
+                    <button id="permissionHelpBtn" class="btn secondary">How to enable</button>
+                    <button id="dismissPermissionBanner" class="btn">Close</button>
+                </div>
+                <div id="permissionHelp" class="help-content" hidden>
+                    <p>To enable microphone access: open your browser settings for this site (click the lock icon near the address bar), allow "Microphone", then retry. On desktop Chrome/Edge: Settings → Site settings → Microphone.</p>
+                </div>
+            </div>
+        </div>
+        <header class="mi-header">
+            <h1>Mock Interview</h1>
+            <p class="mi-sub">Practice with AI-assisted mock interviews</p>
+        </header>
+
+        <main class="mi-main">
+            <!-- Setup Screen -->
+            <section id="setupScreen" class="mi-screen active">
+                <div class="mi-card setup-card">
+                    <h2>Choose session type</h2>
+                    <div class="mi-types" role="radiogroup" aria-label="Interview type">
+                        <button class="type-btn selected" data-type="behavioral">Behavioral</button>
+                        <button class="type-btn" data-type="technical">Technical</button>
+                        <button class="type-btn" data-type="system-design">System Design</button>
+                        <button class="type-btn" data-type="coding">Coding</button>
+                    </div>
+
+                    <label for="numQuestions">Number of questions</label>
+                    <select id="numQuestions">
+                        <option value="3">3</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                    </select>
+
+                    <div class="mi-actions">
+                        <button id="startBtn" class="btn primary">Start Interview</button>
+                        <a href="dashboard.html" class="btn secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Session Screen -->
+            <section id="sessionScreen" class="mi-screen">
+                <div class="session-top">
+                    <div class="session-meta">
+                        <span id="sessionType">Type: Behavioral</span>
+                        <span id="questionCounter">Question 1 / 5</span>
+                    </div>
+                    <div class="session-controls">
+                        <button id="recordBtn" class="btn secondary" aria-pressed="false">Start Recording</button>
+                        <button id="pauseBtn" class="btn secondary">Pause</button>
+                        <button id="nextBtn" class="btn primary">Next</button>
+                        <button id="endBtn" class="btn">End</button>
+                    </div>
+                </div>
+
+                <div class="session-body">
+                    <div class="question-area">
+                        <h3 id="questionText">Loading question...</h3>
+                        <div id="timer" class="timer">00:00</div>
+                    </div>
+
+                    <div class="transcript-area">
+                        <h4>Transcript</h4>
+                        <div id="transcript" class="transcript"></div>
+                        <textarea id="manualNote" placeholder="Add notes..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Screen -->
+            <section id="resultsScreen" class="mi-screen">
+                <div class="mi-card results-card">
+                    <h2>Session Results</h2>
+                    <div class="results-top">
+                        <div class="score-block">
+                            <h3 id="overallScore">--%</h3>
+                            <p>Overall Score</p>
+                        </div>
+                        <div class="metrics-block">
+                            <div class="metric"><strong id="metricClarity">--%</strong><span>Speaking Clarity</span></div>
+                            <div class="metric"><strong id="metricResponse">--%</strong><span>Response Time</span></div>
+                            <div class="metric"><strong id="metricConfidence">--%</strong><span>Vocal Confidence</span></div>
+                        </div>
+                    </div>
+
+                    <div class="ai-feedback">
+                        <h4>AI Feedback</h4>
+                        <p id="aiFeedback">Generating feedback...</p>
+                    </div>
+
+                    <div class="results-transcript">
+                        <h4>Conversation Transcript</h4>
+                        <div id="resultsTranscript" class="transcript"></div>
+                    </div>
+
+                    <div class="results-actions">
+                        <button id="saveSessionBtn" class="btn primary">Save Session</button>
+                        <a href="dashboard.html" class="btn secondary">Back to Dashboard</a>
+                        <button id="closeResultsBtn" class="btn">Close</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    <script src="scripts/mock-interview.js"></script>
+</body>
+</html>

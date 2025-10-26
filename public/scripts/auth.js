@@ -32,6 +32,18 @@ function setLoading(buttonId, isLoading) {
     }
 }
 
+// Safely parse JSON responses (handles empty/non-JSON bodies)
+async function parseResponseJSON(response) {
+    try {
+        const text = await response.text();
+        if (!text) return { success: response.ok };
+        return JSON.parse(text);
+    } catch (err) {
+        console.warn('Failed to parse JSON response:', err);
+        return { success: response.ok, message: 'Unexpected server response' };
+    }
+}
+
 // Handle login form submission
 async function handleLogin(event) {
     event.preventDefault();
@@ -63,7 +75,7 @@ async function handleLogin(event) {
             body: JSON.stringify({ email, password })
         });
         
-        const data = await response.json();
+    const data = await parseResponseJSON(response);
         
         if (data.success) {
             showMessage('successMessage', 'Login successful! Redirecting...', false);
@@ -142,7 +154,7 @@ async function handleSignup(event) {
             })
         });
         
-        const data = await response.json();
+    const data = await parseResponseJSON(response);
         
         if (data.success) {
             showMessage('successMessage', 'Account created successfully! Redirecting...', false);

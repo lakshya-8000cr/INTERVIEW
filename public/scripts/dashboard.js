@@ -260,6 +260,8 @@ function loadRecentActivity() {
 
 function loadPracticeOptions() {
     console.log('Loading practice options...');
+    // populate history in practice section
+    setTimeout(() => { loadInterviewHistory(); }, 150);
 }
 
 function loadAnalyticsData() {
@@ -268,6 +270,130 @@ function loadAnalyticsData() {
     setTimeout(() => {
         animateStats();
     }, 300);
+    // populate chart from history
+    setTimeout(() => { loadInterviewHistory(); }, 300);
+}
+
+// Load interview history (server API with localStorage fallback)
+async function loadInterviewHistory(limit = 20) {
+    const container = document.getElementById('historyList');
+    if (!container) return;
+    container.innerHTML = 'Loading...';
+
+    try {
+        const res = await fetch(`/api/interview/history?limit=${limit}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.success && Array.isArray(data.interviews) && data.interviews.length) {
+                renderHistoryList(data.interviews, container);
+                // also draw trend if in analytics view
+                drawTrendChart(data.interviews);
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn('Failed to fetch server history, falling back to local', err);
+    }
+
+    // Fallback: localStorage
+    try {
+        const raw = localStorage.getItem('interview_history');
+        const arr = raw ? JSON.parse(raw) : [];
+        if (!arr || arr.length === 0) {
+            container.innerHTML = '<p>No past sessions found.</p>';
+            return;
+        }
+        // map local shape to server-like rows
+        const interviews = arr.map(s => ({
+            id: s.id,
+            interview_type: s.interview_type || 'AI Voice',
+            status: 'completed',
+            started_at: s.started_at,
+            ended_at: null,
+            duration_minutes: s.duration_minutes,
+            total_questions: s.total_questions,
+            overall_score: s.overall_score
+        }));
+        renderHistoryList(interviews, container);
+        drawTrendChart(interviews);
+    } catch (err) {
+        console.error('Failed to read local history', err);
+        container.innerHTML = '<p>Unable to load history.</p>';
+    }
+}
+
+function renderHistoryList(interviews, container) {
+    container.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'history-list';
+    interviews.forEach(it => {
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        const date = new Date(it.started_at).toLocaleString();
+        item.innerHTML = `
+            <div class="hi-left">
+                <strong>${it.interview_type || 'Interview'}</strong>
+                <div class="muted">${date}</div>
+            </div>
+            <div class="hi-right">
+                <div class="score">${it.overall_score != null ? it.overall_score + '%' : '--'}</div>
+                <div class="muted">${it.duration_minutes || '-'} min</div>
+            </div>
+        `;
+        // click to view details when server session id exists
+        item.addEventListener('click', () => {
+            if (typeof it.id === 'number') {
+                // open session detail API page (could implement a modal)
+                window.open(`/api/interview/session/${it.id}`, '_blank');
+            } else {
+                showLocalSessionModal(it);
+            }
+        });
+        list.appendChild(item);
+    });
+    container.appendChild(list);
+}
+
+function showLocalSessionModal(it) {
+    // Simple popup with details
+    const w = window.open('', '_blank', 'width=600,height=600');
+    if (!w) return;
+    const html = `
+        <html><head><title>Session ${it.id}</title></head><body>
+        <h2>${it.interview_type}</h2>
+        <p>Started: ${new Date(it.started_at).toLocaleString()}</p>
+        <p>Duration: ${it.duration_minutes} min</p>
+        <p>Score: ${it.overall_score}%</p>
+        <h3>Transcript</h3>
+        <pre>${(it.conversation || JSON.parse(localStorage.getItem('interview_history') || '[]').find(s => s.id===it.id)?.conversation || []).map(p => JSON.stringify(p)).join('\n')}</pre>
+        </body></html>`;
+    w.document.write(html);
+    w.document.close();
+}
+
+function drawTrendChart(interviews) {
+    // find container
+    const chartHolder = document.querySelector('.chart-placeholder');
+    if (!chartHolder) return;
+    // extract latest 12 scores
+    const scores = interviews.map(i => (i.overall_score != null ? Number(i.overall_score) : null)).filter(s => s !== null).slice(0, 12).reverse();
+    if (!scores || scores.length === 0) {
+        chartHolder.innerHTML = '<div class="no-data">No analytics data available</div>';
+        return;
+    }
+    const w = 480, h = 140, padding = 12;
+    const max = Math.max(...scores); const min = Math.min(...scores);
+    const points = scores.map((v, i) => {
+        const x = padding + (i * ((w - padding * 2) / Math.max(1, scores.length - 1)));
+        const y = padding + ((1 - (v - min) / Math.max(1, max - min)) * (h - padding * 2));
+        return `${x},${y}`;
+    }).join(' ');
+    const avg = Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    chartHolder.innerHTML = `
+        <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="${points}" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="8" y="16" fill="#cfeffd" font-size="12">Avg: ${avg}%</text>
+        </svg>`;
 }
 
 function loadFeedbackData() {
