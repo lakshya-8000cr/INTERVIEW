@@ -1,3 +1,34 @@
+const MOCK_QUESTIONS = {
+  behavioral: [
+    "Tell me about a time when you had to work with a difficult team member. How did you handle it?",
+    "Describe a situation where you had to meet a tight deadline. What was your approach?",
+    "Give an example of when you showed leadership skills.",
+    "Tell me about a time you failed. What did you learn from it?",
+    "Describe a situation where you had to adapt to change quickly.",
+  ],
+  technical: [
+    "Explain the difference between REST and GraphQL APIs.",
+    "What is the difference between let, const, and var in JavaScript?",
+    "How does the event loop work in JavaScript?",
+    "Explain what a closure is and give an example.",
+    "What are the main differences between SQL and NoSQL databases?",
+  ],
+  "system-design": [
+    "Design a URL shortening service like bit.ly.",
+    "How would you design a real-time chat application?",
+    "Design a social media feed system that can handle millions of users.",
+    "How would you design a video streaming platform?",
+    "Design a distributed cache system.",
+  ],
+  coding: [
+    "Write a function to reverse a string without using built-in reverse methods.",
+    "How would you find the longest substring without repeating characters?",
+    "Write a function to check if a number is a palindrome.",
+    "How would you implement a binary search algorithm?",
+    "Write a function to flatten a nested array.",
+  ],
+}
+
 // Enhanced UI state management for mock-interview with Web Speech API
 let currentSessionType = "behavioral"
 let currentQuestionIndex = 0
@@ -64,28 +95,113 @@ document.addEventListener("DOMContentLoaded", () => {
       sessionTypeLabel.textContent = `Type: ${currentSessionType.charAt(0).toUpperCase() + currentSessionType.slice(1)}`
 
       // Load first question
-      await loadQuestion()
+      loadFirstQuestion()
     } catch (err) {
       console.error("[v0] Microphone permission denied:", err)
       permissionBanner.hidden = false
     }
   })
 
-  // Retry microphone
-  retryMicBtn.addEventListener("click", () => {
-    startBtn.click()
+  function loadFirstQuestion() {
+    try {
+      currentQuestionIndex = 0
+      questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${totalQuestions}`
+      transcriptEl.innerHTML = ""
+
+      const questions = MOCK_QUESTIONS[currentSessionType]
+      if (!questions || questions.length === 0) {
+        throw new Error("No questions available for this type")
+      }
+
+      const question = questions[currentQuestionIndex % questions.length]
+      questionText.textContent = question
+      conversationHistory.push({ question: question, answer: "" })
+    } catch (err) {
+      console.error("[v0] Error loading first question:", err)
+      questionText.textContent = "Error loading question. Please try again."
+    }
+  }
+
+  function loadNextQuestion(userAnswer) {
+    try {
+      if (conversationHistory.length > 0) {
+        conversationHistory[conversationHistory.length - 1].answer = userAnswer
+      }
+
+      currentQuestionIndex++
+      questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${totalQuestions}`
+
+      const questions = MOCK_QUESTIONS[currentSessionType]
+      if (!questions || questions.length === 0) {
+        throw new Error("No questions available for this type")
+      }
+
+      const question = questions[currentQuestionIndex % questions.length]
+      questionText.textContent = question
+      conversationHistory.push({ question: question, answer: "" })
+    } catch (err) {
+      console.error("[v0] Error loading next question:", err)
+      questionText.textContent = "Error loading question. Please try again."
+    }
+  }
+
+  nextBtn.addEventListener("click", () => {
+    // Get the user's answer from transcript
+    const userAnswer = transcriptEl.textContent.trim()
+
+    if (currentQuestionIndex < totalQuestions - 1) {
+      loadNextQuestion(userAnswer)
+      transcriptEl.innerHTML = ""
+    } else {
+      // Last question answered, show results
+      if (conversationHistory.length > 0) {
+        conversationHistory[conversationHistory.length - 1].answer = userAnswer
+      }
+      showResults()
+    }
   })
 
-  // Permission help toggle
-  permissionHelpBtn.addEventListener("click", () => {
-    permissionHelp.hidden = !permissionHelp.hidden
+  // End button
+  endBtn.addEventListener("click", () => {
+    if (isRecording) {
+      mediaRecorder.stop()
+      isRecording = false
+    }
+    showResults()
   })
 
-  dismissPermissionBanner.addEventListener("click", () => {
-    permissionBanner.hidden = true
-  })
+  function showResults() {
+    try {
+      sessionScreen.classList.remove("active")
+      resultsScreen.classList.add("active")
 
-  // Record button
+      // Generate mock feedback
+      const overallScore = Math.floor(Math.random() * 40) + 60 // 60-100%
+      const feedbackMessages = [
+        "Great communication skills! You explained your thoughts clearly.",
+        "Good problem-solving approach. Consider adding more technical depth.",
+        "Excellent! You demonstrated strong knowledge in this area.",
+        "Nice work! Your answer was well-structured and comprehensive.",
+        "Good effort! Try to provide more specific examples next time.",
+      ]
+
+      const randomFeedback = feedbackMessages[Math.floor(Math.random() * feedbackMessages.length)]
+
+      document.getElementById("overallScore").textContent = `${overallScore}%`
+      document.getElementById("aiFeedback").textContent = randomFeedback
+
+      console.log("[v0] Interview completed:", {
+        type: currentSessionType,
+        questionsAnswered: currentQuestionIndex + 1,
+        score: overallScore,
+        conversation: conversationHistory,
+      })
+    } catch (err) {
+      console.error("[v0] Error showing results:", err)
+      document.getElementById("aiFeedback").textContent = "Session completed!"
+    }
+  }
+
   recordBtn.addEventListener("click", async () => {
     if (!isRecording) {
       try {
@@ -97,9 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
           audioChunks.push(event.data)
         }
 
-        mediaRecorder.onstop = async () => {
-          const audioBlob = new Blob(audioChunks, { type: "audio/wav" })
-          await transcribeAudio(audioBlob)
+        mediaRecorder.onstop = () => {
           stream.getTracks().forEach((track) => track.stop())
         }
 
@@ -141,98 +255,4 @@ document.addEventListener("DOMContentLoaded", () => {
       recordBtn.classList.remove("recording")
     }
   })
-
-  // Next button
-  nextBtn.addEventListener("click", async () => {
-    currentQuestionIndex++
-    if (currentQuestionIndex < totalQuestions) {
-      await loadQuestion()
-    } else {
-      await showResults()
-    }
-  })
-
-  // End button
-  endBtn.addEventListener("click", async () => {
-    if (isRecording) {
-      mediaRecorder.stop()
-      isRecording = false
-    }
-    await showResults()
-  })
-
-  // Load question from API
-  async function loadQuestion() {
-    try {
-      questionCounter.textContent = `Question ${currentQuestionIndex + 1} / ${totalQuestions}`
-      questionText.textContent = "Loading question..."
-      transcriptEl.innerHTML = ""
-
-      const response = await fetch("/api/interview/question", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: currentSessionType,
-          history: conversationHistory,
-        }),
-      })
-
-      const data = await response.json()
-      if (data.question) {
-        questionText.textContent = data.question
-        conversationHistory.push({ question: data.question, answer: "" })
-      }
-    } catch (err) {
-      console.error("[v0] Error loading question:", err)
-      questionText.textContent = "Error loading question. Please try again."
-    }
-  }
-
-  // Transcribe audio
-  async function transcribeAudio(audioBlob) {
-    try {
-      const formData = new FormData()
-      formData.append("audio", audioBlob)
-
-      const response = await fetch("/api/interview/transcribe", {
-        method: "POST",
-        body: formData,
-      })
-
-      const data = await response.json()
-      if (data.transcript) {
-        if (conversationHistory.length > 0) {
-          conversationHistory[conversationHistory.length - 1].answer = data.transcript
-        }
-      }
-    } catch (err) {
-      console.error("[v0] Transcription error:", err)
-    }
-  }
-
-  // Show results
-  async function showResults() {
-    try {
-      sessionScreen.classList.remove("active")
-      resultsScreen.classList.add("active")
-
-      const response = await fetch("/api/interview/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: currentSessionType,
-          history: conversationHistory,
-        }),
-      })
-
-      const feedback = await response.json()
-      document.getElementById("overallScore").textContent = `${Math.round(feedback.overall_score * 10)}%`
-      document.getElementById("metricClarity").textContent = "85%"
-      document.getElementById("metricResponse").textContent = "78%"
-      document.getElementById("metricConfidence").textContent = "82%"
-      document.getElementById("aiFeedback").textContent = feedback.technical_accuracy || "Session completed!"
-    } catch (err) {
-      console.error("[v0] Error generating feedback:", err)
-    }
-  }
 })
