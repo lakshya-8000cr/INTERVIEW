@@ -558,3 +558,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+async function loadSectionContent(sectionId) {
+    switch(sectionId) {
+        case 'overview': loadOverviewData(); break;
+        case 'practice': loadPracticeOptions(); break;
+        case 'analytics': loadAnalyticsData(); break;
+        case 'feedback': loadFeedbackData(); break;
+        case 'library': loadQuestionLibrary(); break;
+        case 'settings': loadUserSettings(); break;
+        case 'mock-interview':
+            const container = document.getElementById('mock-interview');
+            if (container) {
+                const res = await fetch('/mock-interview.html');
+                const html = await res.text();
+                container.innerHTML = html;
+            }
+            break;
+    }
+}

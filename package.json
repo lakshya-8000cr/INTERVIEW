@@ -27,6 +27,8 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "mysql2": "^3.14.3",
+    "next": "^16.0.0",
+    "server": "^1.0.42",
     "sqlite3": "^5.1.7"
   }
 }
