@@ -1,0 +1,58 @@
+{
+  "Feedbacks": [
+    {
+      "id": 1,
+      "name": "Lakshya Chauhan",
+      "message": "Loved the design and smooth animations!",
+      "rating": 5
+    },
+    {
+      "id": 2,
+      "name": "Jashan Mittal",
+      "message": "Everything works great, just improve loading speed.",
+      "rating": 4
+    },
+    {
+      "id": 3,
+      "name": "Aditya Sharma",
+      "message": "Very informative and user-friendly!",
+      "rating": 5
+    },
+    {
+      "id": 4,
+      "name": "Vaibhav Pandey",
+      "message": "Nice project idea. Would love to see more AI features.",
+      "rating": 4
+    },
+    {
+      "id": 5,
+      "name": "Simran Kaur",
+      "message": "Clean layout and color scheme is beautiful!",
+      "rating": 5
+    },
+    {
+      "id": 6,
+      "name": "Aman Verma",
+      "message": "Some buttons were unresponsive on mobile, please fix.",
+      "rating": 3
+    },
+    {
+      "id": 7,
+      "name": "Riya Mehta",
+      "message": "Awesome concept, feels like a professional project!",
+      "rating": 5
+    },
+    {
+      "id": 8,
+      "name": "Tanishq Bansal",
+      "message": "Cool features, but could use dark mode option.",
+      "rating": 4
+    },
+    {
+      "id": "02d9",
+      "name": "Lakshya",
+      "message": "good websote",
+      "rating": 1
+    }
+  ]
+}

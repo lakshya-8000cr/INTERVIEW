@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feedback Hub — Interview Project</title>
+  <style>
+    :root{
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #69707a;
+      --accent: #4f46e5;
+      --accent-2: #7c3aed;
+      --success: #16a34a;
+      --glass: rgba(255,255,255,0.6);
+      --shadow: 0 6px 20px rgba(16,24,40,0.08);
+      --radius: 12px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+      padding:28px;
+      color:#111827;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:20px;
+    }
+
+    .app {
+      width:100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:28px;
+    }
+
+    /* Left: Form */
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.85), var(--card));
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(99,102,241,0.06);
+    }
+    .card h1{
+      font-size:20px;
+      margin:0 0 8px 0;
+      color:#0f172a;
+    }
+    .sub { color:var(--muted); font-size:13px; margin-bottom:12px }
+
+    form .field{
+      margin-bottom:12px;
+    }
+    input[type="text"], textarea, input[type="number"]{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,0.06);
+      background:linear-gradient(180deg,#fff,#fbfdff);
+      font-size:14px;
+      outline:none;
+      transition:box-shadow .12s, border-color .12s;
+    }
+    input:focus, textarea:focus{
+      box-shadow: 0 6px 18px rgba(79,70,229,0.08);
+      border-color: rgba(79,70,229,0.35);
+    }
+    textarea{ min-height:100px; resize:vertical; }
+
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      background: linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 8px 22px rgba(79,70,229,0.12);
+    }
+    .btn[disabled]{ opacity:.6; cursor:not-allowed; box-shadow:none }
+
+    /* Right: Feedback list */
+    .list-wrap {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .toolbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:6px;
+    }
+    .search {
+      width:48%;
+      max-width:320px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(15,23,42,0.06);
+      background:white;
+    }
+    .stats {
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .feedback-list {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+      gap:14px;
+    }
+
+    .fb-card{
+      background:var(--card);
+      padding:12px;
+      border-radius:12px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.04);
+      border:1px solid rgba(0,0,0,0.02);
+    }
+    .fb-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+    }
+    .name {
+      font-weight:700;
+      font-size:14px;
+      color:#0f172a;
+    }
+    .rating { font-size:14px; color:#f59e0b; } /* stars color */
+    .msg {
+      color:var(--muted);
+      font-size:14px;
+      margin-top:6px;
+      line-height:1.4;
+    }
+
+    .empty {
+      padding:28px;
+      text-align:center;
+      color:var(--muted);
+      border-radius:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+      border:1px dashed rgba(15,23,42,0.04);
+    }
+
+    /* toast */
+    .toast {
+      position:fixed;
+      right:22px;
+      bottom:22px;
+      background: #111827;
+      color:white;
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow: 0 8px 24px rgba(2,6,23,0.2);
+      transform: translateY(12px);
+      opacity:0;
+      transition: all .28s ease;
+      z-index:999;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+
+    /* responsive */
+    @media (max-width:980px){
+      .app{ grid-template-columns: 1fr; padding:0 12px; max-width:760px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <!-- Left: Add feedback -->
+    <div class="card" aria-labelledby="form-title">
+      <h1 id="form-title">Share Feedback</h1>
+      <div class="sub">Short & clear feedback — Sir will like this during your demo.</div>
+
+      <form id="feedbackForm" novalidate>
+        <div class="field">
+          <label class="sr-only">Name</label>
+          <input id="name" type="text" placeholder="Your name (e.g. Lakshya)" required />
+        </div>
+
+        <div class="field">
+          <label class="sr-only">Message</label>
+          <textarea id="message" placeholder="What would you like to tell us?" required></textarea>
+        </div>
+
+        <div class="field" style="display:flex; gap:8px;">
+          <input id="rating" type="number" min="1" max="5" placeholder="Rating 1-5" required />
+          <button id="submitBtn" class="btn" type="submit">Submit Feedback</button>
+        </div>
+      </form>
+
+      <div style="margin-top:12px; font-size:13px; color:var(--muted)">
+        Tip: add one feedback only before demo. If you want to re-add, open DevTools → Application → Local Storage and remove key <code>feedbackSubmitted</code>.
+      </div>
+    </div>
+
+    <!-- Right: List of feedbacks -->
+    <div class="card list-wrap" aria-live="polite">
+      <div class="toolbar">
+        <input id="search" class="search" placeholder="Search feedback or name..." />
+        <div class="stats" id="stats">Loading...</div>
+      </div>
+
+      <div id="feedbackArea">
+        <div id="feedbackList" class="feedback-list"></div>
+        <div id="empty" class="empty" style="display:none;">No feedback yet — be the first to add one!</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">✅ Feedback submitted</div>
+
+  <script>
+    const apiUrl = "http://localhost:5000/Feedbacks";
+
+    const feedbackListEl = document.getElementById("feedbackList");
+    const emptyEl = document.getElementById("empty");
+    const statsEl = document.getElementById("stats");
+    const searchEl = document.getElementById("search");
+    const toast = document.getElementById("toast");
+
+    async function loadFeedbacks() {
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        renderList(data);
+      } catch (err) {
+        console.error("Load error:", err);
+        statsEl.textContent = "Failed to load";
+      }
+    }
+
+    function renderList(data) {
+      feedbackListEl.innerHTML = "";
+      if (!data || data.length === 0) {
+        emptyEl.style.display = "block";
+        statsEl.textContent = "0 feedbacks";
+        return;
+      }
+      emptyEl.style.display = "none";
+      statsEl.textContent = `${data.length} feedback${data.length > 1 ? "s" : ""}`;
+
+      // show newest first
+      const sorted = data.slice().sort((a,b) => b.id - a.id);
+      sorted.forEach(fb => {
+        const card = document.createElement("div");
+        card.className = "fb-card";
+        card.innerHTML = `
+          <div class="fb-head">
+            <div class="name">${escapeHtml(fb.name || "Anonymous")}</div>
+            <div class="rating">${stars(fb.rating)}</div>
+          </div>
+          <div class="msg">${escapeHtml(fb.message || "")}</div>
+        `;
+        feedbackListEl.appendChild(card);
+      });
+    }
+
+    // simple star renderer - shows up to 5 stars
+    function stars(n){
+      const count = Math.max(0, Math.min(5, Number(n) || 0));
+      return "★".repeat(count) + "☆".repeat(5 - count);
+    }
+
+    // sanitize minimal
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+
+    // search filter
+    searchEl.addEventListener("input", async (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      try {
+        const res = await fetch(apiUrl);
+        const data = await res.json();
+        const filtered = data.filter(item =>
+          (item.name && item.name.toLowerCase().includes(q)) ||
+          (item.message && item.message.toLowerCase().includes(q)) ||
+          (String(item.rating).includes(q))
+        );
+        renderList(filtered);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    // Submit form once only (localStorage guard)
+    document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (localStorage.getItem("feedbackSubmitted")) {
+        showToast("You already submitted a feedback (demo mode).");
+        return;
+      }
+
+      const name = document.getElementById("name").value.trim() || "Anonymous";
+      const message = document.getElementById("message").value.trim();
+      const rating = Number(document.getElementById("rating").value);
+
+      if (!message || !rating || rating < 1 || rating > 5) {
+        showToast("Please enter a valid message and rating 1–5.");
+        return;
+      }
+
+      document.getElementById("submitBtn").disabled = true;
+
+      try {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, message, rating })
+        });
+        const resp = await res.json();
+        console.log("Added:", resp);
+        localStorage.setItem("feedbackSubmitted", "true"); // single-time guard
+        showToast("Feedback submitted ✅");
+        document.getElementById("feedbackForm").reset();
+        loadFeedbacks();
+      } catch (err) {
+        console.error("Post error:", err);
+        showToast("Submission failed — check server.");
+      } finally {
+        document.getElementById("submitBtn").disabled = false;
+      }
+    });
+
+    // toast helper
+    let toastTimer = null;
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2600);
+    }
+
+    // initial load
+    loadFeedbacks();
+  </script>
+</body>
+</html>

@@ -26,6 +26,7 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "json-server": "^1.0.0-beta.3",
     "mysql2": "^3.14.3",
     "next": "^16.0.0",
     "server": "^1.0.42",
